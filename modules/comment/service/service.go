@@ -80,12 +80,12 @@ gRPC TODO:
    (Refer to the ToProto method defined in dao/comment.go. This method is used to transform data schema from dao into protobuf.)
 */
 func (s *service) UpdateComment(ctx context.Context, req *pb.UpdateCommentRequest) (*pb.UpdateCommentResponse, error) {
-	video_id, err := uuid.Parse(req.GetId())
+	videoID, err := uuid.Parse(req.GetId())
 	if err != nil {
 		return nil, ErrInvalidUUID
 	}
 
-	comment := &dao.Comment{ID: video_id, Content: req.Content}
+	comment := &dao.Comment{ID: videoID, Content: req.Content}
 	if err = s.commentDAO.Update(ctx, comment); err != nil {
 		if errors.Is(err, dao.ErrCommentNotFound) {
 			return nil, ErrCommentNotFound
