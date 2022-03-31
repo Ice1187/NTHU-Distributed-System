@@ -25,6 +25,14 @@ const (
 // create redisCommentDAO by cache and baseDAO
 func NewRedisCommentDAO(client *rediskit.RedisClient, baseDAO CommentDAO) *redisCommentDAO {
 	// Redis TODO
+	redisCache := cache.New(&cache.Options{
+		Redis:      client,
+		LocalCache: cache.NewTinyLFU(commentDAOLocalCacheSize, commentDAOLocalCacheDuration),
+	})
+	return &redisCommentDAO{
+		cache:   redisCache,
+		baseDAO: baseDAO,
+	}
 }
 
 // List all the comments related to the videoID
@@ -33,24 +41,41 @@ func NewRedisCommentDAO(client *rediskit.RedisClient, baseDAO CommentDAO) *redis
 // The implementation should handle both cache miss and cache hit scenarios
 func (dao *redisCommentDAO) ListByVideoID(ctx context.Context, videoID string, limit, offset int) ([]*Comment, error) {
 	// Redis TODO
+	var comments []*Comment
+	if err := dao.cache.Once(&cache.Item{
+		Ctx:   ctx,
+		Key:   listCommentKey(videoID, limit, offset),
+		Value: &comments,
+		TTL:   commentDAORedisCacheDuration,
+		Do: func(i *cache.Item) (interface{}, error) {
+			return dao.baseDAO.ListByVideoID(ctx, videoID, limit, offset)
+		},
+	}); err != nil {
+		return nil, err
+	}
+	return comments, nil
 }
 
 // The operation are not cacheable, just pass down to baseDAO
 func (dao *redisCommentDAO) Create(ctx context.Context, comment *Comment) (uuid.UUID, error) {
 	// Redis TODO
+	return dao.baseDAO.Create(ctx, comment)
 }
 
 // The operation are not cacheable, just pass down to baseDAO
 func (dao *redisCommentDAO) Update(ctx context.Context, comment *Comment) error {
 	// Redis TODO
+	return dao.baseDAO.Update(ctx, comment)
 }
 
 // The operation are not cacheable, just pass down to baseDAO
 func (dao *redisCommentDAO) Delete(ctx context.Context, id uuid.UUID) error {
 	// Redis TODO
+	return dao.baseDAO.Delete(ctx, id)
 }
 
 // The operation are not cacheable, just pass down to baseDAO
 func (dao *redisCommentDAO) DeleteByVideoID(ctx context.Context, videoID string) error {
 	// Redis TODO
+	return dao.baseDAO.DeleteByVideoID(ctx, videoID)
 }

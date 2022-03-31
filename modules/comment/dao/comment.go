@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"fmt"
 
 	"github.com/NTHU-LSALAB/NTHU-Distributed-System/modules/comment/pb"
 	"github.com/google/uuid"
@@ -44,6 +45,7 @@ var (
 // key format: "listComment:{videoID}:{limit}:{offset}"
 func listCommentKey(videoID string, limit, offset int) string {
 	// Redis TODO
+	return fmt.Sprintf("listComment:%s:%d:%d", videoID, limit, offset)
 }
 
 func NewFakeComment(videoID string) *Comment {
