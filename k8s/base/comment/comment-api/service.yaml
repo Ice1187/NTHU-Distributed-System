@@ -1,0 +1,7 @@
+apiVersion: # TODO:
+kind: # TODO:
+metadata:
+  name: comment-api
+spec:
+  type: # TODO:
+  ports: # TODO:

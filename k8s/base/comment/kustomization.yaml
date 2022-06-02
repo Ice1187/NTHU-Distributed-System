@@ -1,0 +1,7 @@
+resources:
+# TODO: - comment-api
+- comment-gateway
+- comment-migration
+
+commonLabels:
+  module: comment
